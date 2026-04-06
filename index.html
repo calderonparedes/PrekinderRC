@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Financiero - Rayen Caven 2025-2026</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+            color: #333;
+            overflow-x: hidden;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        .header {
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #1a1a1a;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .kpi-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 0.5px solid #e0e0e0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .kpi-label {
+            font-size: 11px;
+            color: #999;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+        }
+
+        .kpi-value {
+            font-size: 26px;
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+
+        .kpi-value.ingreso {
+            color: #0F6E56;
+        }
+
+        .kpi-value.egreso {
+            color: #A32D2D;
+        }
+
+        .kpi-value.balance {
+            color: #27500A;
+        }
+
+        .kpi-subtitle {
+            font-size: 11px;
+            color: #999;
+        }
+
+        .kpi-balance {
+            background: linear-gradient(135deg, #EAF3DE 0%, #C0DD97 100%);
+            border: 0.5px solid #97C459;
+        }
+
+        .kpi-balance .kpi-label {
+            color: #3B6D11;
+        }
+
+        .kpi-balance .kpi-subtitle {
+            color: #3B6D11;
+            font-weight: 500;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 0.5px solid #e0e0e0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .chart-card h3 {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+            color: #1a1a1a;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 280px;
+            width: 100%;
+        }
+
+        .ingresos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 0.5px solid #e0e0e0;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .ingresos-grid h3 {
+            grid-column: 1 / -1;
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #1a1a1a;
+        }
+
+        .ingreso-item {
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            border: 0.5px solid #ddd;
+            font-size: 14px;
+        }
+
+        .ingreso-item.cuota {
+            background: linear-gradient(135deg, #E6F1FB 0%, #B5D4F4 100%);
+            border-color: #85B7EB;
+        }
+
+        .ingreso-item.cuota .label,
+        .ingreso-item.cuota .value {
+            color: #185FA5;
+        }
+
+        .ingreso-item.huevitos {
+            background: linear-gradient(135deg, #FAEDE7 0%, #F5C4B3 100%);
+            border-color: #F0997B;
+        }
+
+        .ingreso-item.huevitos .label,
+        .ingreso-item.huevitos .value {
+            color: #993C1D;
+        }
+
+        .ingreso-item.astro {
+            background: linear-gradient(135deg, #E1F5EE 0%, #9FE1CB 100%);
+            border-color: #5DCAA5;
+        }
+
+        .ingreso-item.astro .label,
+        .ingreso-item.astro .value {
+            color: #0F6E56;
+        }
+
+        .ingreso-item.granja {
+            background: linear-gradient(135deg, #FBEAF0 0%, #F4C0D1 100%);
+            border-color: #ED93B1;
+        }
+
+        .ingreso-item.granja .label,
+        .ingreso-item.granja .value {
+            color: #993556;
+        }
+
+        .ingreso-item.fotos {
+            background: linear-gradient(135deg, #FAEEDA 0%, #FAC775 100%);
+            border-color: #EF9F27;
+        }
+
+        .ingreso-item.fotos .label,
+        .ingreso-item.fotos .value {
+            color: #854F0B;
+        }
+
+        .ingreso-item.extras {
+            background: linear-gradient(135deg, #EEEDFE 0%, #CECBF6 100%);
+            border-color: #AFA9EC;
+        }
+
+        .ingreso-item.extras .label,
+        .ingreso-item.extras .value {
+            color: #534AB7;
+        }
+
+        .label {
+            font-size: 11px;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        .value {
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+
+        .subtitle {
+            font-size: 10px;
+            opacity: 0.8;
+        }
+
+        .tabla-egresos {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 0.5px solid #e0e0e0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            overflow-x: auto;
+            margin-bottom: 2rem;
+        }
+
+        .tabla-egresos h3 {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+            color: #1a1a1a;
+        }
+
+        .tabla-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            min-width: 700px;
+        }
+
+        th {
+            background: #f5f5f5;
+            padding: 10px;
+            text-align: left;
+            color: #666;
+            font-weight: 500;
+            border-bottom: 1px solid #e0e0e0;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 10px;
+            border-bottom: 0.5px solid #e0e0e0;
+        }
+
+        tr:hover {
+            background: #fafafa;
+        }
+
+        .fecha {
+            color: #999;
+            white-space: nowrap;
+        }
+
+        .actividad {
+            font-weight: 500;
+            color: #1a1a1a;
+            min-width: 150px;
+        }
+
+        .desc {
+            color: #999;
+            font-size: 11px;
+            max-width: 200px;
+        }
+
+        .monto {
+            text-align: right;
+            font-weight: 500;
+            color: #A32D2D;
+            white-space: nowrap;
+        }
+
+        .btn-ver {
+            background: #E6F1FB;
+            color: #185FA5;
+            border: 0.5px solid #85B7EB;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-ver:hover {
+            background: #B5D4F4;
+            color: #0C447C;
+            text-decoration: none;
+        }
+
+        .btn-ver:active {
+            transform: scale(0.98);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem 0;
+            color: #999;
+            font-size: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem 1rem;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .kpi-value {
+                font-size: 24px;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .chart-container {
+                height: 250px;
+            }
+
+            .ingresos-grid {
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                gap: 10px;
+                padding: 1rem;
+            }
+
+            .ingreso-item {
+                padding: 0.75rem;
+            }
+
+            .value {
+                font-size: 18px;
+            }
+
+            .label {
+                font-size: 10px;
+            }
+
+            table {
+                font-size: 11px;
+                min-width: 600px;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+
+            .btn-ver {
+                padding: 4px 8px;
+                font-size: 10px;
+            }
+
+            .desc {
+                max-width: 120px;
+                font-size: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .kpi-value {
+                font-size: 22px;
+            }
+
+            .ingresos-grid {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                min-width: 500px;
+                font-size: 10px;
+            }
+
+            th, td {
+                padding: 6px;
+            }
+
+            .actividad {
+                min-width: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Dashboard Financiero - Rayen Caven</h1>
+            <p>2025-2026 | Análisis completo de ingresos y egresos</p>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-label">Total Ingresos</div>
+                <div class="kpi-value ingreso">$1.720.600</div>
+                <div class="kpi-subtitle">Cuotas + Actividades</div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-label">Ingresos Cuotas</div>
+                <div class="kpi-value ingreso">$1.045.000</div>
+                <div class="kpi-subtitle">26 alumnos × $50.000</div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-label">Total Egresos</div>
+                <div class="kpi-value egreso">-$1.168.227</div>
+                <div class="kpi-subtitle">32 movimientos</div>
+            </div>
+
+            <div class="kpi-card kpi-balance">
+                <div class="kpi-label">Balance Final</div>
+                <div class="kpi-value balance">$552.373</div>
+                <div class="kpi-subtitle">✓ Superávit</div>
+            </div>
+        </div>
+
+        <!-- Gráficos -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3>Composición de ingresos</h3>
+                <div class="chart-container">
+                    <canvas id="chartIngresos"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h3>Egresos por actividad</h3>
+                <div class="chart-container">
+                    <canvas id="chartEgresos"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detalles Ingresos -->
+        <div class="ingresos-grid">
+            <h3>Detalle de ingresos por fuente</h3>
+            
+            <div class="ingreso-item cuota">
+                <div class="label">Cuotas</div>
+                <div class="value">$1.045.000</div>
+                <div class="subtitle">26 alumnos</div>
+            </div>
+
+            <div class="ingreso-item huevitos">
+                <div class="label">Huevitos</div>
+                <div class="value">$50.000</div>
+                <div class="subtitle">26 alumnos</div>
+            </div>
+
+            <div class="ingreso-item astro">
+                <div class="label">AstroKids</div>
+                <div class="value">$54.600</div>
+                <div class="subtitle">26 alumnos</div>
+            </div>
+
+            <div class="ingreso-item granja">
+                <div class="label">Granja</div>
+                <div class="value">$85.000</div>
+                <div class="subtitle">26 alumnos</div>
+            </div>
+
+            <div class="ingreso-item fotos">
+                <div class="label">Fotos Navidad</div>
+                <div class="value">$195.500</div>
+                <div class="subtitle">Fotógrafo</div>
+            </div>
+
+            <div class="ingreso-item extras">
+                <div class="label">Act. Extras</div>
+                <div class="value">$290.500</div>
+                <div class="subtitle">Jeans + Chilenidad</div>
+            </div>
+        </div>
+
+        <!-- Tabla de Egresos -->
+        <div class="tabla-egresos">
+            <h3>📋 32 Movimientos de egreso - Haz clic en "Ver" para abrir la boleta</h3>
+            <div class="tabla-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nº</th>
+                            <th>Fecha</th>
+                            <th>Actividad</th>
+                            <th>Descripción</th>
+                            <th>Monto</th>
+                            <th>Boleta</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaEgresos">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>📊 Dashboard Financiero Rayen Caven 2025-2026 | Última actualización: Diciembre 2025</p>
+        </div>
+    </div>
+
+    <script>
+        // DATOS CON LINKS DE GOOGLE DRIVE
+        const egresos = [
+            { nro: 1, fecha: '05-04-25', actividad: 'Día de la actividad Física', desc: 'Compra alimentos saludables', monto: 52979, id: '1P6jf8qsRSVzZRRjl6-S_z6JUn2-IRKm1' },
+            { nro: 2, fecha: '14-04-25', actividad: 'Pascua de resurrección', desc: 'Compra de huevos de Chocolate', monto: 43700, id: '17UwTwFI7CWKT2fFNpsu0nS9ETA3eMTtZ' },
+            { nro: 3, fecha: '06-05-25', actividad: 'Día del estudiante', desc: 'Compra decoración, cotillón', monto: 68179, id: '1pc0Cro5ce0cboRKaSwps68a6atmhHS_6' },
+            { nro: 4, fecha: '12-05-25', actividad: 'Día del estudiante', desc: 'Pago DJ', monto: 8571, id: '1BnQoaWGoW6UqfJI5O07gmNZ8LY3x-rps' },
+            { nro: 5, fecha: '13-05-25', actividad: 'Día del estudiante', desc: 'Compra alimentos saludables', monto: 47080, id: '14Xt6dSMy_hwhAr3_2c5pn3w0tquHn5KV' },
+            { nro: 6, fecha: '19-05-25', actividad: 'Pizarra', desc: 'Compra de pizarra', monto: 26968, id: '1h_AMFj-ahaW931GWWH56oMozbFqJtz8y' },
+            { nro: 7, fecha: '12-08-25', actividad: 'Día de la niñez', desc: 'Compra para convivencia', monto: 25673, id: '1_GWXeR1P47r4C6GRL3ABof_TvD0PMHj8' },
+            { nro: 8, fecha: '11-08-25', actividad: 'Astrokids', desc: 'Transferencia entradas actividad', monto: 54600, id: '1Lx30Fa2AVgSujoqf60fn8w3nz8QJ090X' },
+            { nro: 9, fecha: '05-08-25', actividad: 'Juego Dobble', desc: 'Compra juego Dobble', monto: 15990, id: '15kzyLSjR9gMyD_j0Hd_a9knW3f5GHLBl' },
+            { nro: 10, fecha: '12-08-25', actividad: 'Día de la niñez', desc: 'Compra de globos y helio', monto: 41980, id: '1GwDmkQWXfO2WCFOYIdV1fLDlg-tBipup' },
+            { nro: 11, fecha: '26-08-25', actividad: 'Día del técnico parvulario', desc: 'Compra de regalo tía Isabel', monto: 18000, id: '14S-57itLvCrUhCJaGHAUQsTzS_MN-pZR' },
+            { nro: 12, fecha: '08-09-25', actividad: 'Día de la chilenidad', desc: 'Compra decoración Stand', monto: 1980, id: '1WjHfaonPhRj8v2pKymypXnX4JuO2W7-9' },
+            { nro: 13, fecha: '03-09-25', actividad: 'Insumos Sala', desc: 'Compra papel higiénico', monto: 11000, id: '19xRBoKTfPNSz3a9-WSrKLmBCalXWTEHf' },
+            { nro: 14, fecha: '04-09-25', actividad: 'Regalo despedida', desc: 'Compra regalo compañera Ayleen', monto: 4495, id: '1WKb1642EdeHCgiA2JbiADH5eLuJFOBW9' },
+            { nro: 15, fecha: '12-08-25', actividad: 'Día de la chilenidad', desc: 'Abonos de pizzas', monto: 50000, id: '1wHXzhgWGKZku7-xxuQFgzeicCFdWWA65' },
+            { nro: 16, fecha: '27-09-25', actividad: 'Salida pedagógica', desc: 'Transferencia del 50%', monto: 169000, id: '1DJWlnZklhskDWJ2flqWF1gc3RHcKCQIA' },
+            { nro: 17, fecha: '15-10-25', actividad: 'Día del profesor', desc: 'Compra de regalo tía Pauli', monto: 19950, id: '1b_5IX1uZPS_3E6tzghyaTUgiuOGtZs22' },
+            { nro: 18, fecha: '02-11-25', actividad: 'Día de la ciencia', desc: 'Compra y pago plumones', monto: 7980, id: '1l4GAKPaaZ0-gumMA2mlZ3EUkSCNSGwAg' },
+            { nro: 19, fecha: '05-11-25', actividad: 'Abono 1 fotos navidad', desc: 'Primer abono fotógrafo', monto: 106250, id: '1Tqo15jQ_NxTcdIcdimFXw0N4vvRrcVMu' },
+            { nro: 20, fecha: '20-11-25', actividad: 'Día de la ciencia', desc: 'Pago de colgadores', monto: 3490, id: '1J7lc8etX68D7GVQXRcg5YhgMmubwZIQA' },
+            { nro: 21, fecha: '20-11-25', actividad: 'Olimpiadas', desc: 'Boleta olimpiadas', monto: 51062, id: '1n9O1EbcmRsAf1BF3fT86NMXLIzK3WuVN' },
+            { nro: 22, fecha: '27-11-25', actividad: 'Abono 2 fotos navidad', desc: 'Segundo abono fotógrafo', monto: 106250, id: '1EgQxmF8pl2_6Cy0NBS_lM_JpgJV4TOVQ' },
+            { nro: 23, fecha: '09-12-25', actividad: 'Navidad', desc: 'Regalos de navidad', monto: 98490, id: '12kkVVcIw7t-bY6ivg45Z0IsXUlkTbNh9' },
+            { nro: 24, fecha: '10-12-25', actividad: 'Navidad', desc: 'Compra papel de navidad', monto: 3600, id: '1JHrNXWe6RIWYwrqg_aBMWNYV2BrVfFBp' },
+            { nro: 25, fecha: '10-12-25', actividad: 'Navidad', desc: 'Bastones de navidad', monto: 5500, id: '1haPne5ISJHHeQ6ufYQamJKyLlTTtE0ov' },
+            { nro: 26, fecha: '11-12-25', actividad: 'Navidad', desc: 'Abono cabritas y algodón', monto: 7350, id: '1tmNnSvkGDe8P-mLkZW8qIyXCIIvUHRnr' },
+            { nro: 27, fecha: '13-12-25', actividad: 'Navidad', desc: 'Compra frugeles fiesta', monto: 5980, id: '1Wq8l-7wD1muEfl4n0jllm5D4-WjrTKnR' },
+            { nro: 28, fecha: '13-12-25', actividad: 'Navidad', desc: 'Compra frutillas', monto: 6000, id: '1cKr5pMQ0jCiaidr_lVmbF0uUvzryZPyl' },
+            { nro: 29, fecha: '14-12-25', actividad: 'Navidad', desc: 'Bandejas brochetas fiesta', monto: 5900, id: '1GjcFoHb1KGUFw48j1968tpGdH4MOflFX' },
+            { nro: 30, fecha: '14-12-25', actividad: 'Navidad', desc: 'Abono 2 cabritas y algodón', monto: 7350, id: '1DJKM4_ZtRSSnJxkYklJqSmWQc196ZnQb' },
+            { nro: 31, fecha: '15-12-25', actividad: 'Navidad', desc: 'Convivencia de navidad', monto: 57880, id: '1_MUHvwNtA8n65BmjJFO315_lXUcC1Hhw' },
+            { nro: 32, fecha: '15-12-25', actividad: 'Juego inflable navidad', desc: 'Compra juego inflable', monto: 35000, id: '1y0I2Pl0ecRKuzePCcrypt6b8Jh9cv6kq' }
+        ];
+
+        function formatCLP(valor) {
+            return '$' + Math.round(valor).toLocaleString('es-CL');
+        }
+
+        function abrirBoleta(nro) {
+            const egreso = egresos.find(e => e.nro === nro);
+            const driveUrl = `https://drive.google.com/file/d/${egreso.id}/view?usp=sharing`;
+            window.open(driveUrl, '_blank');
+        }
+
+        // RENDERIZAR TABLA
+        const tabla = document.getElementById('tablaEgresos');
+        tabla.innerHTML = egresos.map(e => `
+            <tr>
+                <td>${e.nro}</td>
+                <td class="fecha">${e.fecha}</td>
+                <td class="actividad">${e.actividad}</td>
+                <td class="desc">${e.desc}</td>
+                <td class="monto">${formatCLP(e.monto)}</td>
+                <td><button class="btn-ver" onclick="abrirBoleta(${e.nro})">Ver</button></td>
+            </tr>
+        `).join('');
+
+        // GRÁFICO DE INGRESOS
+        const totalCuotas = 1045000;
+        const totalHuevitos = 50000;
+        const totalAstro = 54600;
+        const totalGranja = 85000;
+        const totalFotos = 195500;
+        const totalActividadesExtras = 290500;
+
+        try {
+            new Chart(document.getElementById('chartIngresos'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Cuotas', 'Huevitos', 'AstroKids', 'Granja', 'Fotos Navidad', 'Act. Extras'],
+                    datasets: [{
+                        data: [totalCuotas, totalHuevitos, totalAstro, totalGranja, totalFotos, totalActividadesExtras],
+                        backgroundColor: ['#185FA5', '#D85A30', '#0F6E56', '#D4537E', '#BA7517', '#534AB7'],
+                        borderColor: '#FFFFFF',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { 
+                            display: true,
+                            position: 'bottom',
+                            labels: {
+                                font: { size: 11 },
+                                padding: 10
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => formatCLP(ctx.parsed)
+                            }
+                        }
+                    }
+                }
+            });
+
+            // GRÁFICO DE EGRESOS
+            new Chart(document.getElementById('chartEgresos'), {
+                type: 'bar',
+                data: {
+                    labels: ['Navidad', 'Salida pedagógica', 'Fotos Navidad', 'Est. Day', 'Niñez', 'Chilenidad', 'Otras'],
+                    datasets: [{
+                        data: [438140, 169000, 212500, 123830, 83653, 51980, 89584],
+                        backgroundColor: '#E24B4A',
+                        borderColor: '#A32D2D',
+                        borderWidth: 0.5
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => formatCLP(ctx.parsed.x)
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: (v) => formatCLP(v)
+                            }
+                        }
+                    }
+                }
+            });
+        } catch (e) {
+            console.error('Error al crear gráficos:', e);
+        }
+    </script>
+</body>
+</html>
